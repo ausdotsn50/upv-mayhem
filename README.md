@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/ausdotsn50/upv-mayhem">
-    <img src="resources/image/splash_inverted.gif" alt="Logo" width="80" height="80">
+    <img src="images/UPV_Mayhem.gif" alt="Logo">
   </a>
 
 <h3 align="center">UPV Mayhem</h3>

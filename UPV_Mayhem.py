@@ -2,15 +2,20 @@
 import tkinter as tk, random, pygame.mixer
 from tkinter import ttk, messagebox
 from PIL import ImageTk, Image
+import os, sys
 
 # window deets
 window = tk.Tk()
-window.title('UPV Mayhem')
-window.geometry('1140x760')
+fish_net_speed = 85
 
-button_style = ttk.Style()
-button_style.configure('Custom.TButton', font=('Tahoma', 15))
-pygame.mixer.init()
+# Added as fix for exe-conversion error
+def resource_path(relative_path):
+    """ Get absolute path to resource """
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 # BaseFrame
 class BaseFrame(tk.Frame):
@@ -20,7 +25,7 @@ class BaseFrame(tk.Frame):
 
     # new admin bg display
     def setup_background(self):
-        bg = Image.open("images/game-intro-bg.png")
+        bg = Image.open(resource_path("images/game-intro-bg.png"))
         self.bg_tk = ImageTk.PhotoImage(bg)
         self.bg_canvas = tk.Canvas(self, width=1140, height=760)
         self.bg_canvas.pack()
@@ -28,14 +33,14 @@ class BaseFrame(tk.Frame):
     
     # CAS classroom display
     def play_background(self):
-        play_bg = Image.open("images/classroom.png")
+        play_bg = Image.open(resource_path("images/classroom.png"))
         self.play_bg_tk = ImageTk.PhotoImage(play_bg)
         self.play_bg_canvas = tk.Canvas(self, width=1140, height=760)
         self.play_bg_canvas.pack()
         self.play_bg_canvas.create_image(0, 0, image=self.play_bg_tk, anchor='nw')
     
     def display_image_bg(self, image_path, position, size):
-        image = Image.open(image_path)
+        image = Image.open(resource_path(image_path))
         image_rs = image.resize(size)
         image_tk = ImageTk.PhotoImage(image_rs)
         self.bg_canvas.create_image(*position, anchor='nw', image=image_tk)
@@ -43,7 +48,7 @@ class BaseFrame(tk.Frame):
     
     # image display for play pages
     def display_image_play(self, image_path, position, size):
-        image = Image.open(image_path)
+        image = Image.open(resource_path(image_path))
         image_rs = image.resize(size)
         image_tk = ImageTk.PhotoImage(image_rs)
         image_id = self.play_bg_canvas.create_image(*position, anchor='nw', image=image_tk)
@@ -57,12 +62,12 @@ class BaseFrame(tk.Frame):
         self.bg_canvas.create_window(*position, anchor='nw', window=button)
 
     def bg_music(self, audio_path, vol, num):
-        pygame.mixer.music.load(audio_path)
+        pygame.mixer.music.load(resource_path(audio_path))
         pygame.mixer.music.set_volume(vol)
         pygame.mixer.music.play(loops=num)
     
     def play_audio(self, audio_path, num):
-        sound = pygame.mixer.Sound(audio_path)
+        sound = pygame.mixer.Sound(resource_path(audio_path))
         sound.play(loops=num)
 
 # home page
@@ -99,10 +104,10 @@ class PlayPage(BaseFrame):
     
     # fishing net movement using --bind--
     def fishing_net(self):
-        fn = Image.open('images/fishing-net-cut.png')
+        fn = Image.open(resource_path('images/fishing-net-cut.png'))
         fn_rs = fn.resize((153, 171))
         self.fn_tk = ImageTk.PhotoImage(fn_rs)  
-        self.fn_tk_id = self.play_bg_canvas.create_image(random.randint(0, 1140 - 250), 565, anchor='nw', image=self.fn_tk) # attached to bg
+        self.fn_tk_id = self.play_bg_canvas.create_image(random.randint(0, 1140 - 250), 565, anchor='nw', image=self.fn_tk)
         # arrow keys
         self.master.bind("<Up>", self.up)
         self.master.bind("<Down>", self.down)
@@ -111,13 +116,13 @@ class PlayPage(BaseFrame):
 
     # movement funcs
     def up(self, event):
-        self.play_bg_canvas.move(self.fn_tk_id, 0, -65)
+        self.play_bg_canvas.move(self.fn_tk_id, 0, -fish_net_speed)
     def down(self, event):
-        self.play_bg_canvas.move(self.fn_tk_id, 0, 65)
+        self.play_bg_canvas.move(self.fn_tk_id, 0, fish_net_speed)
     def left(self, event):
-        self.play_bg_canvas.move(self.fn_tk_id, -65, 0)
+        self.play_bg_canvas.move(self.fn_tk_id, -fish_net_speed, 0)
     def right(self, event):
-        self.play_bg_canvas.move(self.fn_tk_id, 65, 0)
+        self.play_bg_canvas.move(self.fn_tk_id, fish_net_speed, 0)
     
     # T I M E R
     def init_timer(self, page_class):
@@ -138,7 +143,7 @@ class PlayPage(BaseFrame):
     def update_timer(self, page_class):
         self.elapsed_time.set(f"Time: {self.remaining_time}s")
 
-        if self.remaining_time > -1: # display purposes --bugs bugs bugs
+        if self.remaining_time > -1:
             self.remaining_time -= 1
             self.after(1000, lambda: self.update_timer(page_class))
             self.time_check(page_class)
@@ -194,7 +199,7 @@ class PlayPage(BaseFrame):
     def create_falling_object(self, image_path, resize_dimensions, points):
         x = random.randint(0, self.play_bg_canvas.winfo_reqwidth() - resize_dimensions[0] * 2) 
         y = 0 
-        img = Image.open(image_path)
+        img = Image.open(resource_path(image_path))
         img_resized = img.resize(resize_dimensions) 
         img_tk = ImageTk.PhotoImage(img_resized) 
         falling_obj = self.play_bg_canvas.create_image(x, y, anchor='nw', image=img_tk) 
@@ -206,7 +211,7 @@ class PlayPage(BaseFrame):
     def create_flying_object(self, image_path, resize_dimensions, points):
         x = 0
         y = random.randint(0, self.play_bg_canvas.winfo_reqheight() - resize_dimensions[1] * 2) 
-        img = Image.open(image_path) 
+        img = Image.open(resource_path(image_path))
         img_resized = img.resize(resize_dimensions) 
         img_tk = ImageTk.PhotoImage(img_resized) 
         flying_obj = self.play_bg_canvas.create_image(x, y, anchor='nw', image=img_tk) 
@@ -451,8 +456,31 @@ def show_page(page_class):
     page = page_class(window, controller=None)
     page.place(in_=window, x=0, y=0, relwidth=1, relheight=1)
 
-home_page = HomePage(window, controller=None)
-home_page.place(in_=window, x=0, y=0, relwidth=1, relheight=1)
+# Solution from: https://www.geeksforgeeks.org/python/how-to-center-a-window-on-the-screen-in-tkinter/
+def center_window(window):
+    window.update_idletasks()
+    width = window.winfo_width()
+    height = window.winfo_height()
+    screen_width = window.winfo_screenwidth()
+    screen_height = window.winfo_screenheight()
+    x = (screen_width - width) // 2
+    y = (screen_height - height) // 2
+    window.geometry(f"{width}x{height}+{x}+{y}")
 
-window.resizable(True, True)
-window.mainloop()
+def main():    
+    window.title('UPV Mayhem')
+    window.geometry('1140x760')
+
+    button_style = ttk.Style()
+    button_style.configure('Custom.TButton', font=('Tahoma', 15))
+    pygame.mixer.init()
+
+    home_page = HomePage(window, controller=None)
+    home_page.place(in_=window, x=0, y=0, relwidth=1, relheight=1)
+
+    center_window(window)
+    window.resizable(True, True)
+    window.mainloop()
+
+if __name__ == "__main__":
+    main()
